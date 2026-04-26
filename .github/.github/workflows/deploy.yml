@@ -1,0 +1,39 @@
+name: Deploy Telegram Web
+on:
+  push:
+    branches: [ "master", "main" ] # تأكد من اسم فرعك الأساسي
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16
+      - name: Install and Build
+        run: |
+          npm install
+          CI=false npm run build
+        env:
+          REACT_APP_TELEGRAM_API_ID: 23889134
+          REACT_APP_TELEGRAM_API_HASH: 5d334ce258f86f8b14527e121bb08443
+      - name: Upload Artifact
+        uses: actions/upload-pages-artifact@v1
+        with:
+          path: ./build
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1
